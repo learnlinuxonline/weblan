@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LanCache DNS Configuration - LearnLinuxOnline</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #00c6ff;
+            --secondary-color: #0072ff;
+            --dark-bg: #0f2027;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --text-color: #222;
+            --text-light: #444;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark-bg), #203a43, #2c5364);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            padding-bottom: 30px;
+        }
+        
+        .header {
+            background: rgba(23, 32, 42, 0.9);
+            color: #fff;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header p {
+            color: #ccc;
+        }
+        
+        .dns-ip-display {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 198, 255, 0.4);
+        }
+        
+        .dns-ip-display h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .dns-ip {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #000;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            color: var(--text-color);
+        }
+        
+        .card-header {
+            background: rgba(0, 198, 255, 0.15);
+            border-bottom: 1px solid #ddd;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .card-body {
+            padding: 20px;
+            color: var(--text-color);
+        }
+        
+        .config-block {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            color: var(--text-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--primary-color);
+            color: #000;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            font-weight: 600;
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: #000;
+        }
+        
+        .instruction-step {
+            padding: 15px;
+            border-left: 3px solid var(--primary-color);
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 5px;
+        }
+        
+        .instruction-step h5 {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        .instruction-step p {
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+        
+        .copy-btn {
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            color: var(--secondary-color);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .alert-info {
+            background-color: rgba(0, 198, 255, 0.2);
+            color: var(--text-color);
+        }
+        
+        .alert-success {
+            background-color: rgba(40, 167, 69, 0.2);
+            color: var(--text-color);
+        }
+        
+        .alert-danger {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: var(--text-color);
+        }
+        
+        code {
+            color: #e83e8c;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .dns-ip {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <h1>LanCache DNS Configuration</h1>
+                    <p class="lead">Configure your devices to use the LanCache DNS server for optimized game downloads</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- DNS IP Display -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="dns-ip-display">
+                    <h2><i class="fas fa-server me-2"></i>Your LanCache DNS Server IP Address</h2>
+                    <div class="dns-ip">10.160.23.177</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Instructions -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-desktop me-2"></i>Windows Configuration
+                    </div>
+                    <div class="card-body">
+                        <div class="instruction-step">
+                            <h5><span class="step-number">1</span>Open Network Settings</h5>
+                            <p>Go to Control Panel > Network and Internet > Network and Sharing Center</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">2</span>Change Adapter Settings</h5>
+                            <p>Click on "Change adapter settings" on the left sidebar</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">3</span>Properties</h5>
+                            <p>Right-click your network connection and select "Properties"</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">4</span>DNS Settings</h5>
+                            <p>Select "Internet Protocol Version 4 (TCP/IPv4)" and click "Properties"</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">5</span>Use Custom DNS</h5>
+                            <p>Select "Use the following DNS server addresses" and enter:</p>
+                            <div class="config-block">
+                                Preferred DNS server: 10.160.23.177<br>
+                                Alternate DNS server: 8.8.8.8 <span class="copy-btn" onclick="copyToClipboard('8.8.8.8')"><i class="fas fa-copy"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-network-wired me-2"></i>Router Configuration
+                    </div>
+                    <div class="card-body">
+                        <div class="instruction-step">
+                            <h5><span class="step-number">1</span>Access Router</h5>
+                            <p>Open a web browser and enter your router's IP address (usually 192.168.1.1 or 192.168.0.1)</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">2</span>Login</h5>
+                            <p>Enter your router's admin credentials (check router manual if unknown)</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">3</span>Find DNS Settings</h5>
+                            <p>Navigate to Internet or WAN settings, then look for DNS settings</p>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">4</span>Set DNS Server</h5>
+                            <p>Enter the LanCache DNS IP as the primary DNS server:</p>
+                            <div class="config-block">
+                                Primary DNS: 10.160.23.177<br>
+                                Secondary DNS: 1.1.1.1 <span class="copy-btn" onclick="copyToClipboard('1.1.1.1')"><i class="fas fa-copy"></i></span>
+                            </div>
+                        </div>
+                        
+                        <div class="instruction-step">
+                            <h5><span class="step-number">5</span>Save and Reboot</h5>
+                            <p>Save your changes and reboot the router for settings to take effect</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle me-2"></i>About LanCache DNS
+                    </div>
+                    <div class="card-body">
+                        <p>Your LanCache DNS server (10.160.23.177) provides the following benefits:</p>
+                        <ul>
+                            <li>Faster game downloads by caching content locally</li>
+                            <li>Reduced bandwidth usage for frequently downloaded games</li>
+                            <li>Improved download speeds for multiple devices on your network</li>
+                            <li>Automatic redirection of supported game CDN traffic to your cache server</li>
+                        </ul>
+                        
+                        <div class="alert alert-primary mt-3">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Tip:</strong> After configuring DNS, restart your game clients to ensure they use the cached content.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Section -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-vial me-2"></i>Test Your Configuration
+                    </div>
+                    <div class="card-body">
+                        <p>Verify that your DNS configuration is working correctly:</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Windows Command Prompt</h5>
+                                <div class="config-block">
+                                    nslookup lancache.steamcontent.com
+                                </div>
+                                <p class="mt-2">Should return: <code>10.160.23.177</code></p>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h5>Linux/Mac Terminal</h5>
+                                <div class="config-block">
+                                    dig lancache.steamcontent.com
+                                </div>
+                                <p class="mt-2">Look for the ANSWER SECTION showing <code>10.160.23.177</code></p>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary mt-3" onclick="testDns()">
+                            <i class="fas fa-play me-2"></i>Run DNS Test
+                        </button>
+                        
+                        <div id="testResult" class="mt-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2023 LearnLinuxOnline – Linux & Server Tutorials</p>
+            <p>LanCache DNS IP: 10.160.23.177</p>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied: ' + text);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+        
+        function testDns() {
+            const testResult = document.getElementById('testResult');
+            testResult.innerHTML = '<div class="alert alert-info">Testing DNS resolution for lancache.steamcontent.com...</div>';
+            
+            // Simulate DNS test (in a real implementation, this would be an actual DNS query)
+            setTimeout(() => {
+                // Simulate a successful response
+                const success = Math.random() > 0.2; // 80% chance of success
+                
+                if (success) {
+                    testResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>DNS test successful!</strong><br>
+                            lancache.steamcontent.com resolves to 10.160.23.177
+                        </div>
+                        <div class="config-block">
+                            Server:  UnKnown<br>
+                            Address:  10.160.23.177<br><br>
+                            Name:    lancache.steamcontent.com<br>
+                            Address:  10.160.23.177
+                        </div>
+                    `;
+                } else {
+                    testResult.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>DNS test failed!</strong><br>
+                            lancache.steamcontent.com does not resolve to your cache server.
+                            Check your DNS configuration.
+                        </div>
+                    `;
+                }
+            }, 1500);
+        }
+        
+        // Add copy functionality to the DNS IP display
+        document.addEventListener('DOMContentLoaded', function() {
+            const dnsIp = document.querySelector('.dns-ip');
+            dnsIp.style.cursor = 'pointer';
+            dnsIp.title = 'Click to copy IP address';
+            dnsIp.addEventListener('click', function() {
+                copyToClipboard('10.160.23.177');
+            });
+        });
+    </script>
+</body>
+</html>
